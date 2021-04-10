@@ -10,6 +10,11 @@ const rootSchema = gql`
   type Mutation {
     _: String
   }
+
+  type Error {
+    message: String!
+    path: String
+  }
 `;
 
 export default [rootSchema, userSchema, discussionSchema];
