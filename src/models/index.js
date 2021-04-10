@@ -1,8 +1,16 @@
 import Sequelize, { DataTypes } from "sequelize";
 
-const sequelize = new Sequelize("discussion_forum", "postgres", "1234", {
+// replace the database details below
+const DATABASE_NAME = "discussion_forum";
+const DATABASE_USER = "postgres";
+const PASSWORD = "1234";
+
+const sequelize = new Sequelize(DATABASE_NAME, DATABASE_USER, PASSWORD, {
   host: "localhost",
   dialect: "postgres",
+  define: {
+    underscored: true,
+  },
 });
 
 import User from "./User";

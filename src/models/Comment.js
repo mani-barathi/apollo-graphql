@@ -1,11 +1,7 @@
 export default (sequelize, DataTypes) => {
-  const Comment = sequelize.define(
-    "comment",
-    {
-      text: DataTypes.TEXT,
-    },
-    { underscored: true }
-  );
+  const Comment = sequelize.define("comment", {
+    text: DataTypes.TEXT,
+  });
 
   Comment.associate = (models) => {
     Comment.belongsTo(models.User, {
