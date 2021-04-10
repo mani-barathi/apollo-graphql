@@ -1,10 +1,10 @@
-import helloResolver from "./helloResolver";
+import userResolver from "./userResolver";
 
 export default {
   Query: {
-    ...helloResolver.Query,
+    ...userResolver.Query,
   },
   Mutation: {
-    ...helloResolver.Mutation,
+    ...userResolver.Mutation,
   },
 };

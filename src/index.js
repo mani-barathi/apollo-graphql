@@ -1,15 +1,21 @@
 import express from "express";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer, makeExecutableSchema } from "apollo-server-express";
 
 import models from "./models";
-import typeDefs from "./typeDefs";
+import typeDefs from "./schemas";
 import resolvers from "./resolvers";
 
 (async () => {
   await models.sequelize.sync({});
 
+  const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+  });
+  const context = { models };
+
   const app = express();
-  const server = new ApolloServer({ typeDefs, resolvers });
+  const server = new ApolloServer({ schema, context });
   server.applyMiddleware({ app });
 
   app.listen({ port: 4000 }, () =>
