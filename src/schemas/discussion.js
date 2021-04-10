@@ -7,4 +7,8 @@ export default gql`
     text: String!
     user: User!
   }
+
+  extend type Mutation {
+    createDiscussion(title: String!, description: String!): Boolean!
+  }
 `;

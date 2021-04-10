@@ -7,11 +7,11 @@ export default gql`
     email: String!
   }
 
-  type Query {
+  extend type Query {
     getUser(username: String!): User!
   }
 
-  type Mutation {
+  extend type Mutation {
     createUser(username: String!, email: String!, password: String!): String!
   }
 `;

@@ -12,7 +12,7 @@ import resolvers from "./resolvers";
     typeDefs,
     resolvers,
   });
-  const context = { models };
+  const context = { models, user: { id: 1 } };
 
   const app = express();
   const server = new ApolloServer({ schema, context });

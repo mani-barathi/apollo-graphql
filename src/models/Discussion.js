@@ -3,7 +3,7 @@ export default (sequelize, DataTypes) => {
     "discussion",
     {
       title: DataTypes.TEXT,
-      discription: DataTypes.TEXT,
+      description: DataTypes.TEXT,
     },
     { underscored: true }
   );
