@@ -7,10 +7,17 @@ export default gql`
     email: String!
   }
 
-  type AuthResponse {
+  type RegisterResponse {
     ok: Boolean!
     user: User
     errors: [Error]
+  }
+
+  type LoginResponse {
+    ok: Boolean!
+    user: User
+    errors: [Error]
+    accessToken: String
   }
 
   extend type Query {
@@ -18,10 +25,12 @@ export default gql`
   }
 
   extend type Mutation {
-    createUser(
+    signupUser(
       username: String!
       email: String!
       password: String!
-    ): AuthResponse!
+    ): RegisterResponse!
+
+    loginUser(email: String!, password: String!): LoginResponse!
   }
 `;
