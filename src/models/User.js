@@ -37,6 +37,11 @@ export default (sequelize, DataTypes) => {
           },
         },
       },
+      tokenVersion: {
+        type: DataTypes.INTEGER,
+        field: "token_version",
+        defaultValue: 0,
+      },
     }, // end of model fields
     {
       hooks: {

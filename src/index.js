@@ -25,19 +25,22 @@ import {
   app.post("/refresh-token", async (req, res) => {
     const token = req.cookies.qwe;
     if (!token) {
-      return res.send({ ok: false });
+      return res.send({ ok: false, message: "no token provided" });
     }
 
     const data = verifyRefreshToken(token);
     if (!data) {
-      return res.send({ ok: false });
+      return res.send({ ok: false, message: "invalid or expired token" });
     }
     const user = await models.User.findOne({
       where: { id: data.id },
       raw: true,
     });
     if (!user) {
-      return res.send({ ok: false });
+      return res.send({ ok: false, message: "no User exists with that token" });
+    }
+    if (data.tokenVersion !== user.tokenVersion) {
+      return res.send({ ok: false, message: "invalid or expired token" });
     }
 
     const { accessToken, refreshToken } = createTokens(user);
@@ -46,7 +49,6 @@ import {
     return res.send({
       ok: true,
       accessToken,
-      refreshToken,
       user: {
         id: user.id,
         username: user.username,

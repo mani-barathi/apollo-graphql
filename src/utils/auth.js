@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import models from "../models";
 
 // move these to enviorment variables
 const SECRET1 = "klasdfo7afdq235ua";
@@ -16,6 +17,8 @@ export const createTokens = (user) => {
   const accessToken = jwt.sign(payload, SECRET1, {
     expiresIn: "60m",
   });
+
+  payload.tokenVersion = user.tokenVersion;
   const refreshToken = jwt.sign(payload, SECRET2, {
     expiresIn: "7d",
   });
@@ -28,8 +31,8 @@ export const createTokens = (user) => {
 
 export const verifyRefreshToken = (refreshToken) => {
   try {
-    const user = jwt.decode(refreshToken, SECRET2);
-    return user;
+    const data = jwt.decode(refreshToken, SECRET2);
+    return data;
   } catch (error) {
     return null;
   }
@@ -47,5 +50,17 @@ export const isAuthenticated = (req) => {
     return payload;
   } catch (err) {
     throw new Error("not authenticated");
+  }
+};
+
+// If the user has changed or forgotten the password
+// this will increment the tokenVersion making the previous tokens invalid
+export const revokeRefreshToken = async (user) => {
+  try {
+    user.tokenVersion = user.tokenVersion + 1;
+    await user.save();
+    return true;
+  } catch (error) {
+    return false;
   }
 };
