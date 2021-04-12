@@ -22,7 +22,7 @@ export default {
       }
     }, // end of createUser
 
-    loginUser: async (parent, args, { models, res, req }) => {
+    loginUser: async (parent, args, { models, res }) => {
       const { email, password } = args;
       try {
         const user = await models.User.findOne({ where: { email }, raw: true });
@@ -53,5 +53,10 @@ export default {
         };
       }
     }, // end of loginUser
+
+    logoutUser: async (parent, args, { res }) => {
+      sendRefreshTokenAsCookie(res, "");
+      return true;
+    }, // end of logoutUser
   },
 };

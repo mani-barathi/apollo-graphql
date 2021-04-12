@@ -32,5 +32,7 @@ export default gql`
     ): RegisterResponse!
 
     loginUser(email: String!, password: String!): LoginResponse!
+
+    logoutUser: Boolean!
   }
 `;
