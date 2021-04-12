@@ -1,9 +1,13 @@
-function App() {
+import SignupPage from "./pages/SignupPage";
+import LoginPage from "./pages/LoginPage";
+
+function app() {
   return (
     <div className="app">
-      <h1>Hello React</h1>
+      <SignupPage />
+      <LoginPage />
     </div>
   );
 }
 
-export default App;
+export default app;
