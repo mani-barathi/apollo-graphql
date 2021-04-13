@@ -12,17 +12,22 @@ import {
   verifyRefreshToken,
 } from "./utils/auth";
 
-(async () => {
-  const schema = makeExecutableSchema({
-    typeDefs,
-    resolvers,
-  });
+const corsOptions = {
+  origin: "http://localhost:3000",
+  credentials: true,
+};
 
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers,
+});
+
+(async () => {
   await models.sequelize.sync({});
 
   const app = express();
+  app.use(cors(corsOptions));
   app.use(cookieParser());
-  app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
   app.post("/refresh-token", async (req, res) => {
     const token = req.cookies.qwe;
@@ -66,7 +71,7 @@ import {
     },
   });
   // await server.start();
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ app, cors: corsOptions });
 
   app.listen({ port: 4000 }, () =>
     console.log("Now browse to http://localhost:4000" + server.graphqlPath)
