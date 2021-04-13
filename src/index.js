@@ -1,6 +1,7 @@
 import express from "express";
 import { ApolloServer, makeExecutableSchema } from "apollo-server-express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 import models from "./models";
 import typeDefs from "./schemas";
@@ -21,6 +22,7 @@ import {
 
   const app = express();
   app.use(cookieParser());
+  app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
   app.post("/refresh-token", async (req, res) => {
     const token = req.cookies.qwe;

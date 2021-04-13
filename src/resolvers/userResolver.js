@@ -5,7 +5,10 @@ import { createTokens, sendRefreshTokenAsCookie } from "../utils/auth";
 export default {
   Query: {
     getUser: async (parent, args, { models }) => {
-      return await models.User.findOne({ where: { username: args.username } });
+      return await models.User.findOne({
+        where: { username: args.username },
+        raw: true,
+      });
     },
   },
 

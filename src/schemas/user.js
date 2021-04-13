@@ -7,7 +7,7 @@ export default gql`
     email: String!
   }
 
-  type RegisterResponse {
+  type signupResponse {
     ok: Boolean!
     user: User
     errors: [Error]
@@ -21,7 +21,7 @@ export default gql`
   }
 
   extend type Query {
-    getUser(username: String!): User!
+    getUser(username: String!): User
   }
 
   extend type Mutation {
@@ -29,7 +29,7 @@ export default gql`
       username: String!
       email: String!
       password: String!
-    ): RegisterResponse!
+    ): signupResponse!
 
     loginUser(email: String!, password: String!): LoginResponse!
 
