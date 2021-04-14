@@ -5,13 +5,25 @@ export default gql`
     id: Int!
     title: String!
     description: String!
-    user: User!
+    author: User
+    updatedAt: String!
+    createdAt: String!
   }
 
   type CreateDiscussionResponse {
     id: Int
     ok: Boolean!
     errors: [Error]
+  }
+
+  type SingleDiscussionResponse {
+    discussion: Discussion
+    ok: Boolean!
+    errors: [Error!]
+  }
+
+  extend type Query {
+    getSingleDiscussion(id: Int!): SingleDiscussionResponse!
   }
 
   extend type Mutation {

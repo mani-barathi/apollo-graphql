@@ -2,7 +2,29 @@ import { isAuthenticated } from "../utils/auth";
 import formatErrors from "../utils/formatErrors";
 
 export default {
-  Query: {},
+  Query: {
+    getSingleDiscussion: async (parent, args, { models, req }) => {
+      isAuthenticated(req);
+      try {
+        const discussion = await models.Discussion.findByPk(args.id);
+        if (!discussion)
+          return {
+            ok: false,
+            errors: [
+              {
+                path: "unknown",
+                message: `No discussion exists with id ${args.id}`,
+              },
+            ],
+          };
+
+        return { ok: true, discussion };
+      } catch (e) {
+        console.log("createDiscussion: ", e);
+        return { ok: false, errors: formatErrors(e, models) };
+      }
+    },
+  }, // end of Query
 
   Mutation: {
     createDiscussion: async (parent, args, { models, req }) => {
@@ -28,6 +50,17 @@ export default {
       } catch (e) {
         console.log("createDiscussion: ", e);
         return { ok: false, errors: formatErrors(e, models) };
+      }
+    }, // end of createDiscussion
+  }, // end of Mutation
+
+  Discussion: {
+    author: async (parent, args, { models }) => {
+      try {
+        return await models.User.findByPk(parent.userId);
+      } catch (e) {
+        console.log("User:", e);
+        return null;
       }
     },
   },
