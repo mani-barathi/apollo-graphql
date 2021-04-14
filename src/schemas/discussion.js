@@ -4,11 +4,20 @@ export default gql`
   type Discussion {
     id: Int!
     title: String!
-    text: String!
+    description: String!
     user: User!
   }
 
+  type CreateDiscussionResponse {
+    id: Int
+    ok: Boolean!
+    errors: [Error]
+  }
+
   extend type Mutation {
-    createDiscussion(title: String!, description: String!): Boolean!
+    createDiscussion(
+      title: String!
+      description: String!
+    ): CreateDiscussionResponse
   }
 `;

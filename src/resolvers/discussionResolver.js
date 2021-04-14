@@ -1,4 +1,5 @@
 import { isAuthenticated } from "../utils/auth";
+import formatErrors from "../utils/formatErrors";
 
 export default {
   Query: {},
@@ -6,11 +7,27 @@ export default {
   Mutation: {
     createDiscussion: async (parent, args, { models, req }) => {
       const user = isAuthenticated(req);
+      if (args.title.length < 5 || args.description.length < 10) {
+        return {
+          ok: false,
+          errors: [
+            {
+              path: "unknown",
+              message:
+                "title and description should atleast be 5 and 10 characters",
+            },
+          ],
+        };
+      }
       try {
-        await models.Discussion.create({ ...args, userId: user.id });
-        return true;
+        const newDiscussion = await models.Discussion.create({
+          ...args,
+          userId: user.id,
+        });
+        return { ok: true, id: newDiscussion.dataValues.id };
       } catch (e) {
-        return false;
+        console.log("createDiscussion: ", e);
+        return { ok: false, errors: formatErrors(e, models) };
       }
     },
   },
