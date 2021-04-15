@@ -33,6 +33,7 @@ export default gql`
   extend type Query {
     getSingleDiscussion(id: Int!): SingleDiscussionResponse!
     getDiscussionsOfUser(username: String!): ManyDiscussionResponse!
+    getDiscussions(cursor: String): ManyDiscussionResponse!
   }
 
   extend type Mutation {

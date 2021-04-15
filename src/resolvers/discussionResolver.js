@@ -1,6 +1,8 @@
 import { isAuthenticated } from "../utils/auth";
 import formatErrors from "../utils/formatErrors";
 
+const LIMIT = 2;
+
 export default {
   Query: {
     getSingleDiscussion: async (parent, args, { models, req }) => {
@@ -20,10 +22,58 @@ export default {
 
         return { ok: true, discussion };
       } catch (e) {
-        console.log("createDiscussion: ", e);
+        console.log("getSingleDiscussion: ", e);
         return { ok: false, errors: formatErrors(e, models) };
       }
     }, // end of getSingleDiscussion
+
+    getDiscussions: async (parent, args, { models, req }) => {
+      isAuthenticated(req);
+      try {
+        const options = {
+          where: {},
+          include: {
+            model: models.User,
+            attributes: [],
+          },
+          attributes: [
+            "id",
+            "userId",
+            "title",
+            "description",
+            "createdAt",
+            "updatedAt",
+            [models.sequelize.literal('"user"."username"'), "username"],
+          ],
+          order: [["createdAt", "DESC"]],
+          limit: LIMIT,
+          raw: true,
+        };
+
+        if (args.cursor) {
+          options.where.createdAt = {
+            [models.Sequelize.Op.lt]: new Date(parseInt(args.cursor)),
+          };
+        }
+        const discussions = await models.Discussion.findAll(options);
+
+        if (!discussions.length)
+          return {
+            ok: false,
+            errors: [
+              {
+                path: "unknown",
+                message: `No Discussions exists`,
+              },
+            ],
+          };
+
+        return { ok: true, discussions };
+      } catch (e) {
+        console.log("getDiscussions: ", e);
+        return { ok: false, errors: formatErrors(e, models) };
+      }
+    }, // end of getDiscussions
 
     getDiscussionsOfUser: async (parent, args, { models, req }) => {
       isAuthenticated(req);
@@ -63,7 +113,7 @@ export default {
 
         return { ok: true, discussions };
       } catch (e) {
-        console.log("createDiscussion: ", e);
+        console.log("getDiscussionsOfUser: ", e);
         return { ok: false, errors: formatErrors(e, models) };
       }
     }, // end of getDiscussionsOfUser
