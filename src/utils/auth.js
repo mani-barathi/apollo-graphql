@@ -9,13 +9,14 @@ const COOKIE_NAME = "qwe";
 export const sendRefreshTokenAsCookie = (res, refreshToken) => {
   res.cookie(COOKIE_NAME, refreshToken, {
     httpOnly: true,
+    // path: "/refresh_token",            // not working
   });
 };
 
 export const createTokens = (user) => {
   const payload = { id: user.id };
   const accessToken = jwt.sign(payload, SECRET1, {
-    expiresIn: "60m",
+    expiresIn: "20m",
   });
 
   payload.tokenVersion = user.tokenVersion;

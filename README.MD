@@ -9,6 +9,7 @@ _This project is created just to learn about GraphQL, so I may or may not develo
 - [**Apollo-Express**](https://www.apollographql.com/blog/using-express-with-graphql-server-node-js/) as a Server
 - [**Postgres**](https://www.postgresql.org/) as a Database
 - [**Sequlize**](https://sequelize.org/master/) as an ORM
+- [**JWT**](https://github.com/auth0/node-jsonwebtoken) for authorization
 
 ## Setup
 

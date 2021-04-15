@@ -71,7 +71,7 @@ const schema = makeExecutableSchema({
     },
   });
   // await server.start();
-  server.applyMiddleware({ app, cors: corsOptions });
+  server.applyMiddleware({ app, cors: false });
 
   app.listen({ port: 4000 }, () =>
     console.log("Now browse to http://localhost:4000" + server.graphqlPath)
