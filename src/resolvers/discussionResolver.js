@@ -13,7 +13,7 @@ export default {
             errors: [
               {
                 path: "unknown",
-                message: `No discussion exists with id ${args.id}`,
+                message: `No discussion exists`,
               },
             ],
           };
@@ -23,7 +23,50 @@ export default {
         console.log("createDiscussion: ", e);
         return { ok: false, errors: formatErrors(e, models) };
       }
-    },
+    }, // end of getSingleDiscussion
+
+    getDiscussionsOfUser: async (parent, args, { models, req }) => {
+      isAuthenticated(req);
+      try {
+        const discussions = await models.Discussion.findAll({
+          include: {
+            model: models.User,
+            where: {
+              username: args.username,
+            },
+            attributes: [],
+          },
+          attributes: [
+            "id",
+            "userId",
+            "title",
+            "description",
+            "createdAt",
+            "updatedAt",
+            [models.sequelize.literal('"user"."username"'), "username"],
+          ],
+          order: [["createdAt", "DESC"]],
+
+          raw: true,
+        });
+
+        if (!discussions.length)
+          return {
+            ok: false,
+            errors: [
+              {
+                path: "unknown",
+                message: `No Discussions exists`,
+              },
+            ],
+          };
+
+        return { ok: true, discussions };
+      } catch (e) {
+        console.log("createDiscussion: ", e);
+        return { ok: false, errors: formatErrors(e, models) };
+      }
+    }, // end of getDiscussionsOfUser
   }, // end of Query
 
   Mutation: {

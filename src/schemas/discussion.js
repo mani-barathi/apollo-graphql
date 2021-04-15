@@ -8,6 +8,8 @@ export default gql`
     author: User
     updatedAt: String!
     createdAt: String!
+    userId: Int!
+    username: String
   }
 
   type CreateDiscussionResponse {
@@ -22,8 +24,15 @@ export default gql`
     errors: [Error!]
   }
 
+  type ManyDiscussionResponse {
+    discussions: [Discussion!]
+    ok: Boolean!
+    errors: [Error!]
+  }
+
   extend type Query {
     getSingleDiscussion(id: Int!): SingleDiscussionResponse!
+    getDiscussionsOfUser(username: String!): ManyDiscussionResponse!
   }
 
   extend type Mutation {
