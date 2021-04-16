@@ -145,6 +145,41 @@ export default {
         return { ok: false, errors: formatErrors(e, models) };
       }
     }, // end of createDiscussion
+
+    deleteDiscussion: async (parent, args, { models, req }) => {
+      const user = isAuthenticated(req);
+
+      try {
+        const discussion = await models.Discussion.findByPk(args.id);
+        if (!discussion)
+          return {
+            ok: false,
+            errors: [
+              {
+                path: "unknown",
+                message: `No discussion exists`,
+              },
+            ],
+          };
+
+        if (discussion.userId !== user.id) {
+          return {
+            ok: false,
+            errors: [
+              {
+                path: "unknown",
+                message: `Un Authorized`,
+              },
+            ],
+          };
+        }
+        await discussion.destroy();
+        return { ok: true, discussion };
+      } catch (e) {
+        console.log("deleteDiscussion: ", e);
+        return { ok: false, errors: formatErrors(e, models) };
+      }
+    }, // end of deleteDiscussion
   }, // end of Mutation
 
   Discussion: {
