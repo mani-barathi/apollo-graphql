@@ -1,5 +1,6 @@
 import userResolver from "./userResolver";
 import discussionResolver from "./discussionResolver";
+import commentResolver from "./commentResolver";
 
 // export default {
 //   Query: {
@@ -12,4 +13,4 @@ import discussionResolver from "./discussionResolver";
 //   },
 // };
 
-export default [userResolver, discussionResolver];
+export default [userResolver, discussionResolver, commentResolver];
