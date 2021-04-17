@@ -41,6 +41,13 @@ export default gql`
       title: String!
       description: String!
     ): CreateDiscussionResponse
+
     deleteDiscussion(id: Int!): SingleDiscussionResponse!
+
+    updateDiscussion(
+      id: Int!
+      title: String
+      description: String
+    ): SingleDiscussionResponse!
   }
 `;

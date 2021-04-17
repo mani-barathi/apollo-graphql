@@ -1,5 +1,6 @@
 import { isAuthenticated } from "../utils/auth";
 import formatErrors from "../utils/formatErrors";
+import isUserDiscussionValid from "../utils/isUserDiscussionValid";
 
 const LIMIT = 2;
 
@@ -151,28 +152,13 @@ export default {
 
       try {
         const discussion = await models.Discussion.findByPk(args.id);
-        if (!discussion)
-          return {
-            ok: false,
-            errors: [
-              {
-                path: "unknown",
-                message: `No discussion exists`,
-              },
-            ],
-          };
 
-        if (discussion.userId !== user.id) {
-          return {
-            ok: false,
-            errors: [
-              {
-                path: "unknown",
-                message: `Un Authorized`,
-              },
-            ],
-          };
-        }
+        const [isValid, responseMessage] = isUserDiscussionValid(
+          user,
+          discussion
+        );
+        if (!isValid) return responseMessage;
+
         await discussion.destroy();
         return { ok: true, discussion };
       } catch (e) {
@@ -180,6 +166,28 @@ export default {
         return { ok: false, errors: formatErrors(e, models) };
       }
     }, // end of deleteDiscussion
+
+    updateDiscussion: async (parent, args, { models, req }) => {
+      const user = isAuthenticated(req);
+      try {
+        const discussion = await models.Discussion.findByPk(args.id);
+        const [isValid, responseMessage] = isUserDiscussionValid(
+          user,
+          discussion
+        );
+        if (!isValid) return responseMessage;
+
+        if (args.title) discussion.title = args.title;
+
+        if (args.description) discussion.description = args.description;
+
+        discussion.save();
+        return { ok: true, discussion };
+      } catch (e) {
+        console.log("updateDiscussion: ", e);
+        return { ok: false, errors: formatErrors(e, models) };
+      }
+    }, // end of updateDiscussion
   }, // end of Mutation
 
   Discussion: {
