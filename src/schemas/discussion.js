@@ -28,11 +28,15 @@ export default gql`
     discussions: [Discussion!]
     ok: Boolean!
     errors: [Error!]
+    hasMore: Boolean
   }
 
   extend type Query {
     getSingleDiscussion(id: Int!): SingleDiscussionResponse!
-    getDiscussionsOfUser(username: String!): ManyDiscussionResponse!
+    getDiscussionsOfUser(
+      username: String!
+      cursor: String
+    ): ManyDiscussionResponse!
     getDiscussions(cursor: String): ManyDiscussionResponse!
   }
 
@@ -40,7 +44,7 @@ export default gql`
     createDiscussion(
       title: String!
       description: String!
-    ): CreateDiscussionResponse
+    ): SingleDiscussionResponse
 
     deleteDiscussion(id: Int!): SingleDiscussionResponse!
 

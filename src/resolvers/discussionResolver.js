@@ -3,6 +3,14 @@ import formatErrors from "../utils/formatErrors";
 import isUserDiscussionValid from "../utils/isUserDiscussionValid";
 
 const LIMIT = 2;
+const discussionAttributes = [
+  "id",
+  "userId",
+  "title",
+  // "description",
+  "createdAt",
+  "updatedAt",
+];
 
 export default {
   Query: {
@@ -13,12 +21,7 @@ export default {
         if (!discussion)
           return {
             ok: false,
-            errors: [
-              {
-                path: "unknown",
-                message: `No discussion exists`,
-              },
-            ],
+            errors: [{ path: "unknown", message: `No discussion exists` }],
           };
 
         return { ok: true, discussion };
@@ -38,12 +41,7 @@ export default {
             attributes: [],
           },
           attributes: [
-            "id",
-            "userId",
-            "title",
-            "description",
-            "createdAt",
-            "updatedAt",
+            ...discussionAttributes,
             [models.sequelize.literal('"user"."username"'), "username"],
           ],
           order: [["createdAt", "DESC"]],
@@ -61,25 +59,22 @@ export default {
         if (!discussions.length)
           return {
             ok: false,
-            errors: [
-              {
-                path: "unknown",
-                message: `No Discussions exists`,
-              },
-            ],
+            hasMore: false,
+            errors: [{ path: "unknown", message: `No Discussions exists` }],
           };
 
-        return { ok: true, discussions };
+        return { ok: true, discussions, hasMore: true };
       } catch (e) {
         console.log("getDiscussions: ", e);
-        return { ok: false, errors: formatErrors(e, models) };
+        return { ok: false, hasMore: false, errors: formatErrors(e, models) };
       }
     }, // end of getDiscussions
 
     getDiscussionsOfUser: async (parent, args, { models, req }) => {
       isAuthenticated(req);
       try {
-        const discussions = await models.Discussion.findAll({
+        const options = {
+          where: {},
           include: {
             model: models.User,
             where: {
@@ -88,34 +83,33 @@ export default {
             attributes: [],
           },
           attributes: [
-            "id",
-            "userId",
-            "title",
-            "description",
-            "createdAt",
-            "updatedAt",
+            ...discussionAttributes,
             [models.sequelize.literal('"user"."username"'), "username"],
           ],
           order: [["createdAt", "DESC"]],
-
+          limit: LIMIT,
           raw: true,
-        });
+        };
+
+        if (args.cursor) {
+          options.where.createdAt = {
+            [models.Sequelize.Op.lt]: new Date(parseInt(args.cursor)),
+          };
+        }
+
+        const discussions = await models.Discussion.findAll(options);
 
         if (!discussions.length)
           return {
             ok: false,
-            errors: [
-              {
-                path: "unknown",
-                message: `No Discussions exists`,
-              },
-            ],
+            hasMore: false,
+            errors: [{ path: "unknown", message: `No Discussions exists` }],
           };
 
-        return { ok: true, discussions };
+        return { ok: true, discussions, hasMore: true };
       } catch (e) {
         console.log("getDiscussionsOfUser: ", e);
-        return { ok: false, errors: formatErrors(e, models) };
+        return { ok: false, hasMore: false, errors: formatErrors(e, models) };
       }
     }, // end of getDiscussionsOfUser
   }, // end of Query
@@ -123,7 +117,7 @@ export default {
   Mutation: {
     createDiscussion: async (parent, args, { models, req }) => {
       const user = isAuthenticated(req);
-      if (args.title.length < 5 || args.description.length < 10) {
+      if (args.title.length < 5 || args.description.length < 10)
         return {
           ok: false,
           errors: [
@@ -134,13 +128,13 @@ export default {
             },
           ],
         };
-      }
+
       try {
         const newDiscussion = await models.Discussion.create({
           ...args,
           userId: user.id,
         });
-        return { ok: true, id: newDiscussion.dataValues.id };
+        return { ok: true, discussion: newDiscussion };
       } catch (e) {
         console.log("createDiscussion: ", e);
         return { ok: false, errors: formatErrors(e, models) };
