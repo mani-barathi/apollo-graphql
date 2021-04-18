@@ -9,10 +9,21 @@ export default gql`
     username: String
   }
 
+  type MultipleCommentResponse {
+    comments: [Comment!]
+    ok: Boolean!
+    hasMore: Boolean
+    errors: [Error]
+  }
+
   type CreateCommentResponse {
     comment: Comment
     ok: Boolean!
     errors: [Error]
+  }
+
+  extend type Query {
+    getComments(discussionId: Int!, cursor: String): MultipleCommentResponse!
   }
 
   extend type Mutation {
