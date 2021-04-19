@@ -11,6 +11,7 @@ export default gql`
 
   type MultipleCommentResponse {
     comments: [Comment!]
+    discussionId: Int
     ok: Boolean!
     hasMore: Boolean
     errors: [Error]

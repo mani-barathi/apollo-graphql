@@ -2,13 +2,14 @@ import { isAuthenticated } from "../utils/auth";
 import formatErrors from "../utils/formatErrors";
 
 const LIMIT = 2;
-const commentAttributes = ["id", "text", "createdAt"];
+const commentAttributes = ["id", "text", "createdAt", "discussionId"];
 
 export default {
   Query: {
     getComments: async (parent, args, { req, models }) => {
       isAuthenticated(req);
-      if (!args.discussionId)
+      const { discussionId, cursor } = args;
+      if (!discussionId)
         return {
           ok: false,
           errors: [{ path: "unknown", message: "No DiscussionId provided" }],
@@ -16,7 +17,7 @@ export default {
 
       try {
         const options = {
-          where: { discussionId: args.discussionId },
+          where: { discussionId },
           include: {
             model: models.User,
             attributes: [],
@@ -25,14 +26,14 @@ export default {
             ...commentAttributes,
             [models.sequelize.literal('"user"."username"'), "username"],
           ],
-          // order: [["createdAt", "DESC"]],
+          order: [["createdAt", "ASC"]],
           limit: LIMIT,
           raw: true,
         };
 
-        if (args.cursor) {
+        if (cursor) {
           options.where.createdAt = {
-            [models.Sequelize.Op.gt]: new Date(parseInt(args.cursor)),
+            [models.Sequelize.Op.gt]: new Date(parseInt(cursor)),
           };
         }
         const comments = await models.Comment.findAll(options);
@@ -40,11 +41,15 @@ export default {
         if (!comments.length)
           return {
             ok: false,
+            discussionId,
             hasMore: false,
             errors: [{ path: "unknown", message: `No comments exists` }],
           };
 
-        return { ok: true, comments, hasMore: true };
+        if (comments.length < LIMIT)
+          return { ok: true, comments, discussionId, hasMore: false };
+
+        return { ok: true, comments, discussionId, hasMore: true };
       } catch (e) {
         console.log("getCommentsOfDiscussion: ", e);
         return { ok: false, errors: formatErrors(e, models) };

@@ -2,7 +2,7 @@ import { isAuthenticated } from "../utils/auth";
 import formatErrors from "../utils/formatErrors";
 import isUserDiscussionValid from "../utils/isUserDiscussionValid";
 
-const LIMIT = 2;
+const LIMIT = 4;
 const discussionAttributes = [
   "id",
   "userId",
@@ -63,6 +63,9 @@ export default {
             errors: [{ path: "unknown", message: `No Discussions exists` }],
           };
 
+        if (discussions.length < LIMIT)
+          return { ok: true, discussions, hasMore: false };
+
         return { ok: true, discussions, hasMore: true };
       } catch (e) {
         console.log("getDiscussions: ", e);
@@ -105,6 +108,9 @@ export default {
             hasMore: false,
             errors: [{ path: "unknown", message: `No Discussions exists` }],
           };
+
+        if (discussions.length < LIMIT)
+          return { ok: true, discussions, hasMore: false };
 
         return { ok: true, discussions, hasMore: true };
       } catch (e) {
