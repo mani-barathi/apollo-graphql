@@ -14,7 +14,7 @@ export const sendRefreshTokenAsCookie = (res, refreshToken) => {
 };
 
 export const createTokens = (user) => {
-  const payload = { id: user.id };
+  const payload = { id: user.id, username: user.username };
   const accessToken = jwt.sign(payload, SECRET1, {
     expiresIn: "20m",
   });

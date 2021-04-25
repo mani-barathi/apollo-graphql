@@ -1,20 +1,30 @@
+import { PubSub, withFilter } from "apollo-server-express";
 import { isAuthenticated } from "../utils/auth";
 import formatErrors from "../utils/formatErrors";
 
 const LIMIT = 2;
 const commentAttributes = ["id", "text", "createdAt", "discussionId"];
-
+const NEW_COMMENT = "NEW_COMMENT";
+const pubsub = new PubSub();
 export default {
+  Subscription: {
+    newComment: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator(NEW_COMMENT),
+        (payload, variables) => {
+          // Only push an update if the comment is on
+          // the correct discussion for this operation
+          return payload.newComment.discussionId === variables.discussionId;
+        }
+      ),
+    },
+  },
+
   Query: {
     getComments: async (parent, args, { req, models }) => {
       isAuthenticated(req);
       const { discussionId, cursor } = args;
-      if (!discussionId)
-        return {
-          ok: false,
-          errors: [{ path: "unknown", message: "No DiscussionId provided" }],
-        };
-
+      const limitPlusOne = LIMIT + 1;
       try {
         const options = {
           where: { discussionId },
@@ -26,30 +36,24 @@ export default {
             ...commentAttributes,
             [models.sequelize.literal('"user"."username"'), "username"],
           ],
-          order: [["createdAt", "ASC"]],
-          limit: LIMIT,
+          order: [["createdAt", "DESC"]],
+          limit: limitPlusOne,
           raw: true,
         };
 
         if (cursor) {
           options.where.createdAt = {
-            [models.Sequelize.Op.gt]: new Date(parseInt(cursor)),
+            [models.Sequelize.Op.lt]: new Date(parseInt(cursor)),
           };
         }
         const comments = await models.Comment.findAll(options);
 
-        if (!comments.length)
-          return {
-            ok: false,
-            discussionId,
-            hasMore: false,
-            errors: [{ path: "unknown", message: `No comments exists` }],
-          };
-
-        if (comments.length < LIMIT)
-          return { ok: true, comments, discussionId, hasMore: false };
-
-        return { ok: true, comments, discussionId, hasMore: true };
+        return {
+          ok: true,
+          hasMore: comments.length === limitPlusOne,
+          comments: comments.slice(0, LIMIT),
+          discussionId,
+        };
       } catch (e) {
         console.log("getCommentsOfDiscussion: ", e);
         return { ok: false, errors: formatErrors(e, models) };
@@ -70,6 +74,16 @@ export default {
         const comment = await models.Comment.create({
           ...args,
           userId: user.id,
+        });
+        pubsub.publish(NEW_COMMENT, {
+          newComment: {
+            id: comment.id,
+            text: comment.text,
+            discussionId: comment.discussionId,
+            username: user.username,
+            createdAt: comment.createdAt,
+            userId: comment.userId,
+          },
         });
         return { ok: true, comment };
       } catch (e) {

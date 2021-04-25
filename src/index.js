@@ -2,6 +2,7 @@ import express from "express";
 import { ApolloServer, makeExecutableSchema } from "apollo-server-express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import http from "http";
 
 import models from "./models";
 import typeDefs from "./schemas";
@@ -10,6 +11,7 @@ import {
   sendRefreshTokenAsCookie,
   createTokens,
   verifyRefreshToken,
+  isAuthenticated,
 } from "./utils/auth";
 
 const corsOptions = {
@@ -26,6 +28,7 @@ const schema = makeExecutableSchema({
   await models.sequelize.sync({});
 
   const app = express();
+  const httpServer = http.createServer(app);
   app.use(cors(corsOptions));
   app.use(cookieParser());
 
@@ -69,11 +72,22 @@ const schema = makeExecutableSchema({
     context: ({ req, res }) => {
       return { req, res, models };
     },
+    subscriptions: {
+      path: "/subscriptions",
+      onConnect: (_, ws) => {
+        console.log("client conncted!");
+      },
+      onDisconnect: () => console.log("client Disconnected!"),
+    },
   });
   // await server.start();
   server.applyMiddleware({ app, cors: false });
+  server.installSubscriptionHandlers(httpServer);
 
-  app.listen({ port: 4000 }, () =>
-    console.log("Now browse to http://localhost:4000" + server.graphqlPath)
-  );
+  httpServer.listen({ port: 4000 }, () => {
+    console.log("Now browse to http://localhost:4000" + server.graphqlPath);
+    console.log(
+      "Now browse to http://localhost:4000" + server.subscriptionsPath
+    );
+  });
 })();

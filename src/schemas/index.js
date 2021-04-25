@@ -11,6 +11,10 @@ const rootSchema = gql`
   type Mutation {
     _: String
   }
+  
+  type Subscription {
+    _: String
+  }
 
   type Error {
     message: String!

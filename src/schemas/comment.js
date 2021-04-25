@@ -30,4 +30,8 @@ export default gql`
   extend type Mutation {
     createComment(discussionId: Int!, text: String!): CreateCommentResponse!
   }
+
+  extend type Subscription {
+    newComment(discussionId: Int!): Comment
+  }
 `;
